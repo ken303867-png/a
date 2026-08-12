@@ -11,44 +11,27 @@
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
 <title>摂食嚥下認定看護師 試験対策360問</title>
 <style>
-html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f4f7f8;color:#183033}
-main{max-width:720px;margin:auto;padding:48px 20px}
-.card{background:#fff;border:1px solid #d8e3e5;border-radius:18px;padding:24px;box-shadow:0 12px 30px rgba(0,0,0,.06)}
-h1{font-size:1.35rem;margin:0 0 12px}.bar{height:8px;background:#d9efed;border-radius:99px;overflow:hidden;margin:18px 0}.fill{height:100%;width:8%;background:#08766d;border-radius:99px;transition:width .2s}.muted{color:#65787b}.error{white-space:pre-wrap;color:#9f1239;background:#fff1f2;padding:12px;border-radius:10px}
+html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f4f7f8;color:#183033}main{max-width:720px;margin:auto;padding:48px 20px}.card{background:#fff;border:1px solid #d8e3e5;border-radius:18px;padding:24px;box-shadow:0 12px 30px rgba(0,0,0,.06)}h1{font-size:1.35rem;margin:0 0 12px}.bar{height:8px;background:#d9efed;border-radius:99px;overflow:hidden;margin:18px 0}.fill{height:100%;width:8%;background:#08766d;border-radius:99px;transition:width .2s}.muted{color:#65787b}.error{white-space:pre-wrap;color:#9f1239;background:#fff1f2;padding:12px;border-radius:10px}
 </style>
 </head>
-<body>
-<main><div class="card"><h1>摂食嚥下認定看護師 試験対策360問</h1><p id="status">アプリを読み込んでいます…</p><div class="bar"><div class="fill" id="fill"></div></div><p class="muted">初回のみ学習データを読み込みます。2回目以降はオフラインでも起動できます。</p><div id="error"></div></div></main>
+<body><main><div class="card"><h1>摂食嚥下認定看護師 試験対策360問</h1><p id="status">アプリを読み込んでいます…</p><div class="bar"><div class="fill" id="fill"></div></div><p class="muted">初回のみ学習データを読み込みます。読み込み後はオフラインでも使用できます。</p><div id="error"></div></div></main>
 <script>
 (async()=>{
- const status=document.getElementById('status'), fill=document.getElementById('fill'), err=document.getElementById('error');
- const parts=['app.part1'];
+ const status=document.getElementById('status'),fill=document.getElementById('fill'),err=document.getElementById('error');
  try{
-   if(!('DecompressionStream' in window)) throw new Error('このSafariはアプリの展開機能に対応していません。iPadOS / Safariを最新版へ更新してください。');
-   let b64='';
-   for(let i=0;i<parts.length;i++){
-     status.textContent=`学習データを読み込んでいます… ${i+1}/${parts.length}`;
-     const r=await fetch('./'+parts[i],{cache:'force-cache'});
-     if(!r.ok) throw new Error(parts[i]+' の読込に失敗しました: '+r.status);
-     b64+=await r.text();
-     fill.style.width=((i+1)/parts.length*70)+'%';
-   }
-   status.textContent='アプリを展開しています…';
-   const raw=atob(b64.trim());
-   const bytes=new Uint8Array(raw.length);
-   for(let i=0;i<raw.length;i++) bytes[i]=raw.charCodeAt(i);
-   const ds=new DecompressionStream('gzip');
-   const decompressed=await new Response(new Blob([bytes]).stream().pipeThrough(ds)).text();
-   fill.style.width='90%';
-   if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1')){
-     try{await navigator.serviceWorker.register('./sw.js',{scope:'./'});}catch(e){console.warn(e)}
-   }
-   document.open(); document.write(decompressed); document.close();
- }catch(e){
-   console.error(e);
-   status.textContent='アプリを読み込めませんでした';
-   err.innerHTML='<div class="error">'+String(e.message||e)+'</div><p class="muted">Safariでページを再読み込みしてください。改善しない場合は iPadOS を更新してください。</p>';
- }
+  if(!('DecompressionStream' in window)) throw new Error('このSafariはgzip展開に対応していません。iPadOSを最新版へ更新してください。');
+  if('serviceWorker' in navigator){try{await navigator.serviceWorker.register('./sw.js?v=23',{scope:'./'});}catch(e){console.warn('SW',e)}}
+  status.textContent='360問データを読み込んでいます…';fill.style.width='35%';
+  const r=await fetch('./app.html.gz?v=23',{cache:'no-store'});
+  if(!r.ok) throw new Error('学習データ app.html.gz の読込に失敗しました（HTTP '+r.status+'）。');
+  const buf=await r.arrayBuffer();
+  if(buf.byteLength<100000) throw new Error('学習データが不完全です（'+buf.byteLength+' bytes）。');
+  fill.style.width='70%';status.textContent='アプリを展開しています…';
+  const ds=new DecompressionStream('gzip');
+  const decompressed=await new Response(new Blob([buf]).stream().pipeThrough(ds)).text();
+  if(!decompressed.includes('app-data')||!decompressed.includes('次の問題へ')) throw new Error('学習アプリ本体の検証に失敗しました。');
+  fill.style.width='100%';status.textContent='起動しています…';
+  document.open();document.write(decompressed);document.close();
+ }catch(e){console.error(e);status.textContent='アプリを読み込めませんでした';err.innerHTML='<div class="error">'+String(e.message||e)+'</div><p class="muted">このエラーは自動的に切り分けできる形式です。画面をそのままお知らせください。</p>'}
 })();
-</script>
-</body></html>
+</script></body></html>
