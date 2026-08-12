@@ -1,14 +1,25 @@
-# 摂食嚥下認定看護師 試験対策360問 PWA
+# 摂食嚥下評価尺度 暗記アプリ（PWA）
 
-iPad / iPhone / PC / Androidで使用できるPWA版学習アプリです。
+DSS・摂食嚥下能力グレード・FILS・FOISを、穴埋め・4択・並べ替えの50問で学習するPWAです。
 
-- 全360問
-- 50連続事例
-- 学習モード / 試験モード
-- 間違い・自信なし・お気に入り
-- 解説最下部の「次の問題へ」
-- オフライン対応
-- 端末内保存
+## 公開URL
 
-## iPad
-GitHub Pagesで公開されたURLをSafariで開き、共有 →「ホーム画面に追加」を選択してください。
+https://ken303867-png.github.io/a/
+
+## 主な機能
+
+- 50問の暗記問題
+- DSS / 摂食嚥下能力グレード / FILS / FOIS
+- 間違い・自信なしの復習
+- 学習履歴の端末内保存
+- Service Workerによるオフライン利用
+- ホーム画面へのPWAインストール
+
+## インストール
+
+- Android / Chrome: ブラウザの「インストール」またはアプリ内のインストール操作を使用
+- iPhone / iPad / Safari: 共有メニューから「ホーム画面に追加」を選択
+
+## GitHub Pages
+
+`.github/workflows/pages.yml` により、`main` ブランチへの更新時にGitHub Pagesへ自動デプロイします。
