@@ -1,0 +1,22 @@
+{
+  "name": "摂食嚥下評価尺度 暗記アプリ",
+  "short_name": "嚥下尺度暗記",
+  "description": "DSS・摂食嚥下能力グレード・FILS・FOISを50問で学ぶ、オフライン対応の暗記アプリ",
+  "lang": "ja",
+  "id": "./",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f3f7f8",
+  "theme_color": "#123a5a",
+  "categories": ["education", "medical"],
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
