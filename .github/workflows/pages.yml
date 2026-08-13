@@ -39,7 +39,7 @@ jobs:
           html = gzip.decompress(base64.b64decode(encoded))
           required = [
               b"swallow_cloze_614_independent_pwa_v1",
-              "1\u753b\u9762\u306b1\u984c\u305a\u3064\u8868\u793a\u3057\u307e\u3059\u3002".encode("utf-8"),
+              b'"actual_cards":614',
           ]
           if not all(marker in html for marker in required):
               raise SystemExit("Unexpected swallow-cloze payload")
