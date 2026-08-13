@@ -1,6 +1,6 @@
 const CACHE_PREFIX = 'swallow-cloze-614-independent-';
-const CACHE = CACHE_PREFIX + 'v4-20260813-parts10';
-const ASSETS = ['./','./index.html','./manifest.json','./icon-192.png','./icon-512.png','./app.part01', './app.part02', './app.part03', './app.part04', './app.part05', './app.part06', './app.part07', './app.part08', './app.part09', './app.part10'];
+const CACHE = CACHE_PREFIX + 'v5-20260813-parts10-noicon';
+const ASSETS = ['./','./index.html','./manifest.json','./app.part01','./app.part02','./app.part03','./app.part04','./app.part05','./app.part06','./app.part07','./app.part08','./app.part09','./app.part10'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith(CACHE_PREFIX)&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);if(u.origin!==self.location.origin||!u.href.startsWith(self.registration.scope))return;if(e.request.mode==='navigate'){e.respondWith(fetch(e.request).then(r=>{const c=r.clone();caches.open(CACHE).then(x=>x.put('./index.html',c));return r}).catch(()=>caches.match('./index.html')));return}e.respondWith(caches.match(e.request).then(c=>c||fetch(e.request).then(r=>{if(r&&r.status===200){const copy=r.clone();caches.open(CACHE).then(x=>x.put(e.request,copy))}return r})))});
