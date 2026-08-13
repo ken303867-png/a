@@ -1,5 +1,4 @@
 name: Deploy PWA to GitHub Pages
-# Redeploy marker: Pages source re-enabled 2026-08-13
 on:
   push:
     branches: [main]
@@ -10,7 +9,7 @@ permissions:
   id-token: write
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   deploy:
     environment:
