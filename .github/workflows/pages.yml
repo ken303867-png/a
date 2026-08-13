@@ -4,7 +4,7 @@ on:
     branches: [main]
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 concurrency:
@@ -19,6 +19,43 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+      - name: Expand grade and FILS reference tables
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('scale/index.html')
+          s = path.read_text(encoding='utf-8')
+
+          grade = '''<article class="card reference-card"><header class="reference-head"><h2>摂食嚥下能力グレード</h2><p>条件が整えば、どこまで「できる」か・10段階</p></header><div class="reference-body"><table><thead><tr><th>区分</th><th>Grade</th><th>内容</th></tr></thead><tbody><tr><td>重症<br>経口不可</td><td>1</td><td>嚥下困難または不能で、嚥下訓練の適応がない。</td></tr><tr><td>重症<br>経口不可</td><td>2</td><td>基礎的嚥下訓練（間接訓練）のみが適応となる。</td></tr><tr><td>重症<br>経口不可</td><td>3</td><td>条件が整えば誤嚥が減少し、食物を用いる摂食訓練（直接訓練）が可能となる。</td></tr><tr><td>中等度<br>経口＋補助</td><td>4</td><td>食事として十分な量ではないが、楽しみとしての摂食が可能である。</td></tr><tr><td>中等度<br>経口＋補助</td><td>5</td><td>1～2食を経口摂取できるが、必要量を満たすため補助栄養を併用する。</td></tr><tr><td>中等度<br>経口＋補助</td><td>6</td><td>3食を経口摂取できるが、必要量の不足を補う補助栄養が必要である。</td></tr><tr><td>軽症<br>経口のみ</td><td>7</td><td>嚥下食で3食とも経口摂取でき、補助栄養を必要としない。</td></tr><tr><td>軽症<br>経口のみ</td><td>8</td><td>特別に嚥下しにくい食品を除けば、3食を経口摂取できる。</td></tr><tr><td>軽症<br>経口のみ</td><td>9</td><td>常食を経口摂取できるが、臨床的な観察と指導を要する。</td></tr><tr><td>正常</td><td>10</td><td>正常の摂食嚥下能力を有する。</td></tr></tbody></table><p style="margin:12px 0 0;color:var(--muted);font-size:11px">※摂食介助が必要な場合はAを付記する（例：Grade 7A）。</p></div></article>'''
+
+          fils = '''<article class="card reference-card"><header class="reference-head"><h2>FILS</h2><p>日常生活で実際にどこまで「している」か・10段階</p></header><div class="reference-body"><table><thead><tr><th>区分</th><th>Level</th><th>内容</th></tr></thead><tbody><tr><td>経口摂取なし</td><td>1</td><td>口腔ケアを除き、嚥下訓練を行っていない。</td></tr><tr><td>経口摂取なし</td><td>2</td><td>食物を用いない嚥下訓練を行っている。</td></tr><tr><td>経口摂取なし</td><td>3</td><td>ごく少量の食物を用いた嚥下訓練を行っている。食事としての経口摂取は行っていない。</td></tr><tr><td>経口＋代替栄養</td><td>4</td><td>1食分未満の嚥下食を楽しみレベルで経口摂取しているが、代替栄養が主体である。</td></tr><tr><td>経口＋代替栄養</td><td>5</td><td>1～2食の嚥下食を経口摂取しているが、代替栄養も行っている。</td></tr><tr><td>経口＋代替栄養</td><td>6</td><td>3食の嚥下食経口摂取が主体で、不足分を代替栄養で補っている。</td></tr><tr><td>経口摂取のみ</td><td>7</td><td>3食の嚥下食を経口摂取しており、代替栄養は行っていない。</td></tr><tr><td>経口摂取のみ</td><td>8</td><td>特別に食べにくいものを除けば、3食を経口摂取している。</td></tr><tr><td>経口摂取のみ</td><td>9</td><td>食物の制限なく3食を経口摂取しているが、摂食嚥下障害を示唆する問題があり医学的配慮を要する。</td></tr><tr><td>正常</td><td>10</td><td>食物の制限なく3食を経口摂取し、摂食嚥下障害に関する問題がない。</td></tr></tbody></table><p style="margin:12px 0 0;color:var(--muted);font-size:11px">※代替栄養：経管栄養・点滴などの非経口栄養。特別に食べにくいもの：パサつくもの、硬いもの、水など。</p></div></article>'''
+
+          p_grade = re.compile(r'<article class="card reference-card"><header class="reference-head"><h2>摂食嚥下能力グレード</h2>.*?</article>', re.S)
+          p_fils = re.compile(r'<article class="card reference-card"><header class="reference-head"><h2>FILS</h2>.*?</article>', re.S)
+          s, n1 = p_grade.subn(grade, s, count=1)
+          s, n2 = p_fils.subn(fils, s, count=1)
+          if (n1, n2) != (1, 1):
+              raise SystemExit(f'Expected one match each, got grade={n1}, FILS={n2}')
+          path.write_text(s, encoding='utf-8')
+          PY
+          git diff --check
+          grep -q 'Grade</th><th>内容' scale/index.html
+          grep -q 'Level</th><th>内容' scale/index.html
+      - name: Commit reference update
+        shell: bash
+        run: |
+          if git diff --quiet -- scale/index.html; then
+            echo "Reference tables already updated."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scale/index.html
+          git commit -m "Expand grade and FILS quick reference"
+          git push origin HEAD:main
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
