@@ -1,6 +1,6 @@
 "use strict";
-const CACHE='dysphagia-scale-pwa-v1';
-const SHELL=['./','./index.html','./manifest.webmanifest','./icon.svg'];
+const CACHE='dysphagia-scale-pwa-v2-transfer';
+const SHELL=['./','./index.html','./manifest.webmanifest','./icon.svg','./data-transfer.js'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('dysphagia-scale-pwa-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);if(u.origin!==self.location.origin)return;if(e.request.mode==='navigate'){e.respondWith(fetch(e.request).then(r=>{if(r&&r.ok){const x=r.clone();caches.open(CACHE).then(c=>c.put('./index.html',x));}return r;}).catch(()=>caches.match('./index.html')));return;}e.respondWith(caches.match(e.request,{ignoreSearch:true}).then(c=>c||fetch(e.request).then(r=>{if(r&&r.ok){const x=r.clone();caches.open(CACHE).then(cache=>cache.put(e.request,x));}return r;})));});self.addEventListener('message',e=>{if(e.data&&e.data.type==='SKIP_WAITING')self.skipWaiting();});
