@@ -19,6 +19,28 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+      - name: Diagnose 360 update notice
+        shell: bash
+        run: |
+          gzip -dc app.html.gz > /tmp/app360.html
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('/tmp/app360.html').read_text(encoding='utf-8', errors='replace')
+          print('APP_HTML_LENGTH', len(s))
+          patterns=[
+            '新しいバージョン', '更新があります', 'アップデート',
+            'updatefound', 'serviceWorker', 'registration.waiting',
+            'controllerchange', 'SKIP_WAITING', 'skipWaiting'
+          ]
+          for p in patterns:
+              matches=list(re.finditer(re.escape(p), s, flags=re.I))
+              print(f'PATTERN {p!r} COUNT {len(matches)}')
+              for i,m in enumerate(matches[:5],1):
+                  a=max(0,m.start()-500); b=min(len(s),m.end()+700)
+                  print(f'--- {p} #{i} ---')
+                  print(s[a:b].replace('\n','\\n'))
+          PY
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
