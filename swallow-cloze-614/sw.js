@@ -1,6 +1,6 @@
 const CACHE_PREFIX = 'swallow-cloze-614-independent-';
-const CACHE = CACHE_PREFIX + 'v6-20260813-standalone';
-const ASSETS = ['./', './index.html', './manifest.json'];
+const CACHE = CACHE_PREFIX + 'v7-20260813-results';
+const ASSETS = ['./', './index.html', './manifest.json', './results-patch.js?v=1'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
 });

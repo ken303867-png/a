@@ -43,8 +43,19 @@ jobs:
           ]
           if not all(marker in html for marker in required):
               raise SystemExit("Unexpected swallow-cloze payload")
+
+          text = html.decode("utf-8")
+          patch_tag = '<script src="./results-patch.js?v=1"></script>'
+          if patch_tag not in text:
+              if "</body>" not in text:
+                  raise SystemExit("Missing body close tag")
+              text = text.replace("</body>", patch_tag + "\n</body>", 1)
+          html = text.encode("utf-8")
+          if b"results-patch.js?v=1" not in html:
+              raise SystemExit("Results patch was not injected")
+
           (app_dir / "index.html").write_bytes(html)
-          print(f"Built {app_dir / 'index.html'}: {len(html)} bytes")
+          print(f"Built {app_dir / 'index.html'} with results screen patch: {len(html)} bytes")
           PY
       - name: Upload site
         uses: actions/upload-pages-artifact@v4
